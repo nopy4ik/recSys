@@ -4,27 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f4f0">
-  <title>Авто по вкусу — рекомендации</title>
+  <title>Подбор автомобиля</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="wordmark" href="/" aria-label="Авто по вкусу, на главную"><span class="mark">А</span><span>авто<span class="wordmark-light"> по вкусу</span></span></a>
-    <span class="dataset-label"><span class="status-dot"></span> Учебные данные · 24 профиля</span>
+    <a class="wordmark" href="/">Подбор авто</a>
   </header>
 
   <main>
     <section class="intro">
       <div class="intro-copy">
-        <p class="overline">Подбор по предпочтениям</p>
-        <h1>Машины, которые<br>выбирают похожие на вас.</h1>
-        <p class="lede">Рекомендации строятся по тому, какие автомобили нравились пользователям с похожим выбором.</p>
+        <h1>Подбор автомобиля</h1>
+        <p class="lede">Выберите пример истории — система предложит машины, которые нравились покупателям с похожим выбором.</p>
       </div>
-      <div class="method-note"><span class="method-symbol" aria-hidden="true">↗</span><span>Совместные предпочтения<br>ранжируются по PMI</span></div>
     </section>
 
     <form class="filters" action="/" method="get">
-      <label class="field profile-field"><span>Профиль покупателя</span><select name="profile">$profile_options</select></label>
+      <label class="field profile-field"><span>Пример истории выбора</span><select name="profile">$profile_options</select></label>
       <label class="field budget-field"><span>Бюджет до</span><span class="input-unit"><input name="budget" type="number" min="0" max="20000000" step="100000" value="$budget"><span>₽</span></span></label>
       <label class="field body-field"><span>Тип кузова</span><select name="body">$body_options</select></label>
       <button type="submit">Показать подборку <span aria-hidden="true">→</span></button>
@@ -32,10 +29,10 @@
 
     <div class="content-grid">
       <aside class="history">
-        <div class="section-head"><h2>Уже понравилось</h2><span>2–3 авто</span></div>
+        <div class="section-head"><h2>Уже понравилось</h2></div>
         <p class="history-profile">$profile_label</p>
         <ul>$liked_rows</ul>
-        <p class="history-note">Это положительные оценки в демонстрационной истории профиля.</p>
+        <p class="history-note">История выбора — это список машин, которые понравились одному условному покупателю. По ней алгоритм ищет похожие предпочтения.</p>
       </aside>
 
       <section class="recommendations" aria-labelledby="results-title">
@@ -51,6 +48,5 @@
     </section>
   </main>
 
-  <footer><span>Авто по вкусу</span><span>Лабораторная работа · рекомендательные системы</span></footer>
 </body>
 </html>

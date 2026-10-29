@@ -43,7 +43,7 @@ HISTORY_SETS = [
     ("Семейный кроссовер", ["sportage", "rav4", "jolion"]),
 ]
 PROFILES = [
-    {"label": f"Профиль {index:02} · {kind}", "likes": likes}
+    {"label": f"История {index:02} · {kind}", "likes": likes}
     for index, (kind, likes) in enumerate(HISTORY_SETS * 2, start=1)
 ]
 
