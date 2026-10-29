@@ -16,34 +16,25 @@
     <section class="intro">
       <div class="intro-copy">
         <h1>Подбор автомобиля</h1>
-        <p class="lede">Выберите пример истории — система предложит машины, которые нравились покупателям с похожим выбором.</p>
+        <p class="lede">Отметьте машины, которые вам нравятся. Мы сравним ваш выбор с предпочтениями других покупателей.</p>
       </div>
     </section>
 
     <form class="filters" action="/" method="get">
-      <label class="field profile-field"><span>Пример истории выбора</span><select name="profile">$profile_options</select></label>
+      <fieldset class="preferences"><legend>Какие автомобили вам нравятся?</legend><div class="car-options">$car_options</div></fieldset>
       <label class="field budget-field"><span>Бюджет до</span><span class="input-unit"><input name="budget" type="number" min="0" max="20000000" step="100000" value="$budget"><span>₽</span></span></label>
       <label class="field body-field"><span>Тип кузова</span><select name="body">$body_options</select></label>
-      <button type="submit">Показать подборку <span aria-hidden="true">→</span></button>
+      <button type="submit">Подобрать автомобили <span aria-hidden="true">→</span></button>
     </form>
 
-    <div class="content-grid">
-      <aside class="history">
-        <div class="section-head"><h2>Уже понравилось</h2></div>
-        <p class="history-profile">$profile_label</p>
-        <ul>$liked_rows</ul>
-        <p class="history-note">История выбора — это список машин, которые понравились одному условному покупателю. По ней алгоритм ищет похожие предпочтения.</p>
-      </aside>
-
-      <section class="recommendations" aria-labelledby="results-title">
+    <section class="recommendations" aria-labelledby="results-title">
         <div class="section-head results-head"><div><h2 id="results-title">Рекомендуем посмотреть</h2><p>Подборка по похожим предпочтениям</p></div><span class="result-count">$result_count $result_word</span></div>
         <div class="result-list">$results</div>
         <p class="data-note">Цены, характеристики и истории в прототипе синтетические — для учебной демонстрации.</p>
-      </section>
-    </div>
+    </section>
 
     <section class="methodology">
-      <div><h2>Как формируется список</h2><p>Для каждой пары автомобилей считаем PMI по числу профилей, которым понравились оба. Выше в списке — машины с более выраженной связью с выбором профиля.</p></div>
+      <div><h2>Как формируется список</h2><p>Для каждой пары автомобилей PMI считается по готовой матрице предпочтений других покупателей. Для вашего выбора оцениваем связь с каждым отмеченным автомобилем и ранжируем кандидатов по среднему значению.</p></div>
       <code>PMI(x, y) = log₂ (nₓᵧ · N / nₓ · nᵧ)</code>
     </section>
   </main>

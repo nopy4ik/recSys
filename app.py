@@ -27,7 +27,7 @@ CARS = {
     "jolion": {"name": "Haval Jolion", "year": 2022, "body": "Кроссовер", "engine": "1.5 л · робот", "price": 2_650_000},
 }
 
-# Synthetic positive feedback: each row represents one anonymous user profile.
+# Synthetic positive feedback: each row represents one other buyer's preferences.
 HISTORY_SETS = [
     ("Городской седан", ["rio", "solaris", "polo"]),
     ("Городской седан", ["rio", "solaris", "rapid"]),
@@ -42,7 +42,7 @@ HISTORY_SETS = [
     ("Поездки за город", ["duster", "jolion", "tucson"]),
     ("Семейный кроссовер", ["sportage", "rav4", "jolion"]),
 ]
-PROFILES = [
+HISTORIES = [
     {"label": f"История {index:02} · {kind}", "likes": likes}
     for index, (kind, likes) in enumerate(HISTORY_SETS * 2, start=1)
 ]
@@ -55,23 +55,22 @@ def money(value):
 
 
 def pmi(left, right, counts, total_users):
-    together = sum(1 for profile in PROFILES if left in profile["likes"] and right in profile["likes"])
+    together = sum(1 for history in HISTORIES if left in history["likes"] and right in history["likes"])
     if not together:
         return None, 0
     score = log2((together * total_users) / (counts[left] * counts[right]))
     return score, together
 
 
-def recommendations(profile, budget, body):
-    counts = Counter(car_id for user in PROFILES for car_id in user["likes"])
-    liked = profile["likes"]
+def recommendations(liked, budget, body):
+    counts = Counter(car_id for history in HISTORIES for car_id in history["likes"])
     ranked = []
     for car_id, car in CARS.items():
         if car_id in liked or car["price"] > budget or (body and car["body"] != body):
             continue
         links = []
         for liked_id in liked:
-            score, together = pmi(car_id, liked_id, counts, len(PROFILES))
+            score, together = pmi(car_id, liked_id, counts, len(HISTORIES))
             if score is not None:
                 links.append({"source": liked_id, "score": score, "together": together})
         if links:
@@ -81,11 +80,7 @@ def recommendations(profile, budget, body):
 
 
 def render(query):
-    profile_index = query.get("profile", ["0"])[0]
-    if not profile_index.isdigit() or int(profile_index) >= len(PROFILES):
-        profile_index = "0"
-    profile_index = int(profile_index)
-    profile = PROFILES[profile_index]
+    liked = list(dict.fromkeys(car_id for car_id in query.get("car", []) if car_id in CARS))
     body = query.get("body", [""])[0]
     if body not in ("", "Седан", "Лифтбек", "Кроссовер"):
         body = ""
@@ -95,28 +90,24 @@ def render(query):
         budget = 3_000_000
     budget = max(0, min(budget, 20_000_000))
 
-    profile_options = "\n".join(
-        f'<option value="{i}"{" selected" if i == profile_index else ""}>{escape(item["label"])}</option>'
-        for i, item in enumerate(PROFILES)
+    car_options = "\n".join(
+        f'<label class="car-option"><input type="checkbox" name="car" value="{car_id}"{" checked" if car_id in liked else ""}><span>{escape(car["name"])}</span><small>{car["year"]} · {escape(car["body"])}</small></label>'
+        for car_id, car in CARS.items()
     )
-    liked_rows = "\n".join(
-        f'<li><span>{escape(CARS[car_id]["name"])}</span><span class="muted">{CARS[car_id]["year"]} · {escape(CARS[car_id]["body"])}</span></li>'
-        for car_id in profile["likes"]
-    )
-    recs = recommendations(profile, budget, body)
+    recs = recommendations(liked, budget, body)
     if recs:
         result_markup = "\n".join(recommendation_row(item, rank) for rank, item in enumerate(recs, start=1))
+    elif not liked:
+        result_markup = '<div class="empty"><strong>Отметьте автомобили, которые вам нравятся</strong><p>Мы сравним ваш выбор с готовой матрицей предпочтений покупателей.</p></div>'
     else:
         result_markup = '<div class="empty"><strong>Подходящих рекомендаций нет</strong><p>Увеличьте бюджет или выберите другой тип кузова.</p></div>'
     return TEMPLATE.substitute(
-        profile_options=profile_options,
+        car_options=car_options,
         budget=budget,
         body_options="\n".join(
             f'<option value="{value}"{" selected" if value == body else ""}>{label}</option>'
             for value, label in (("", "Любой кузов"), ("Седан", "Седан"), ("Лифтбек", "Лифтбек"), ("Кроссовер", "Кроссовер"))
         ),
-        profile_label=escape(profile["label"]),
-        liked_rows=liked_rows,
         results=result_markup,
         result_count=len(recs),
         result_word="автомобилей" if len(recs) in (0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14) else ("автомобиль" if len(recs) % 10 == 1 else "автомобиля"),
@@ -131,7 +122,7 @@ def recommendation_row(item, rank):
     return f'''<article class="result-row">
       <span class="rank">{rank:02}</span>
       <div class="car-main"><h3>{escape(car["name"])}</h3><p>{car["year"]} · {escape(car["body"])} · {escape(car["engine"])}</p>
-        <p class="reason">Похож на {escape(source)} <span>· {top_link["together"]} общих профилей · PMI {top_link["score"]:+.2f}</span></p></div>
+        <p class="reason">Похож на {escape(source)} <span>· {top_link["together"]} общих покупателей · PMI {top_link["score"]:+.2f}</span></p></div>
       <div class="car-score"><strong>{score}</strong><span>средний PMI</span></div>
       <div class="price">{money(car["price"])}</div>
     </article>'''

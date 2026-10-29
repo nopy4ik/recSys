@@ -34,7 +34,14 @@ main { width: min(1160px, calc(100% - 56px)); margin: 0 auto; }
 h1 { margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: -.035em; font-weight: 620; }
 .lede { max-width: 62ch; margin: 10px 0 0; color: #58635d; font-size: 14px; line-height: 1.5; }
 
-.filters { display: grid; grid-template-columns: minmax(220px, 1.5fr) minmax(170px, 1fr) minmax(170px, 1fr) auto; gap: 16px; align-items: end; padding: 19px; background: #e9ebe5; border: 1px solid #dfe3dc; }
+.filters { display: grid; grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) auto; gap: 16px; align-items: end; padding: 19px; background: #e9ebe5; border: 1px solid #dfe3dc; }
+.preferences { grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; border: 0; }
+.preferences legend { margin-bottom: 8px; color: #56615a; font-size: 12px; font-weight: 650; }
+.car-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 15px; }
+.car-option { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: center; gap: 2px 8px; min-width: 0; padding: 8px 0; border-bottom: 1px solid #d5dbd4; cursor: pointer; }
+.car-option input { grid-row: 1 / 3; accent-color: var(--accent); }
+.car-option span { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.car-option small { color: var(--muted); font-size: 12px; }
 .field { display: grid; gap: 8px; min-width: 0; }
 .field > span:first-child { color: #56615a; font-size: 12px; font-weight: 650; letter-spacing: .015em; }
 .field select, .input-unit { width: 100%; height: 42px; border: 1px solid #cbd2cb; background: var(--surface); color: var(--ink); }
@@ -48,15 +55,10 @@ h1 { margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: -.035em; fon
 .filters button:hover { background: #254c39; }
 .filters button:active { background: #1c3e2e; }
 
-.content-grid { display: grid; grid-template-columns: 265px minmax(0, 1fr); gap: 54px; padding: 43px 0 52px; }
+.recommendations { padding: 30px 0 24px; }
 .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 13px; }
 .section-head h2, .methodology h2 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -.025em; }
 .section-head > span, .result-count { color: var(--muted); font-size: 12px; white-space: nowrap; }
-.history-profile { margin: 17px 0 11px; color: var(--accent); font-size: 12px; font-weight: 600; }
-.history ul { list-style: none; margin: 0; padding: 0; }
-.history li { display: flex; justify-content: space-between; gap: 8px; padding: 10px 0; border-bottom: 1px solid #e1e4df; font-size: 13px; }
-.muted { color: var(--muted); font-size: 12px; white-space: nowrap; }
-.history-note { margin: 17px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
 .results-head { align-items: center; }
 .results-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
 .result-list { border-bottom: 1px solid var(--line); }
@@ -83,6 +85,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
 
 @media (max-width: 880px) {
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .car-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .filters button { align-self: end; }
   .content-grid { grid-template-columns: 220px minmax(0, 1fr); gap: 28px; }
   .result-row { grid-template-columns: 26px minmax(0, 1fr) 77px; gap: 11px; }
@@ -97,16 +100,14 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
   h1 { font-size: 31px; }
   .lede { font-size: 14px; }
   .filters { grid-template-columns: 1fr 1fr; gap: 13px; padding: 14px; }
-  .profile-field { grid-column: 1 / -1; }
   .filters button { grid-column: 1 / -1; width: 100%; }
-  .content-grid { display: flex; flex-direction: column; gap: 33px; padding: 34px 0 40px; }
-  .history { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .car-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .recommendations { padding-top: 28px; }
   .result-row { grid-template-columns: 22px minmax(0, 1fr) 72px; gap: 9px; min-height: 108px; }
   .car-main h3 { font-size: 14px; }
   .car-score strong { font-size: 15px; }
   .price { margin-top: -14px; }
   .methodology code { max-width: 100%; overflow-wrap: anywhere; font-size: 11px; }
-  footer { flex-direction: column; gap: 6px; padding: 17px 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }

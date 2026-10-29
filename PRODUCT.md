@@ -16,7 +16,7 @@ Primary user: a student demonstrating a recommender system for a lab assignment.
 
 ## Product Purpose
 
-Demonstrate how a recommender can suggest cars from positive preferences shared by users. Success means a visitor can select a profile, see ranked car suggestions, and understand why they were suggested.
+Demonstrate how a recommender can suggest cars from positive preferences shared by users. Success means a visitor can enter their own liked cars, see ranked suggestions based on a prefilled preference matrix from other buyers, and understand why they were suggested.
 
 ## Positioning
 
@@ -28,7 +28,7 @@ The app is a local Python web app intended to be shared in a Git repository and 
 
 ## Capabilities and Constraints
 
-The core recommender uses a user-car positive interaction matrix, item-to-item co-occurrence, and PMI-based ranking. Demo interactions and listings are synthetic and must be labeled as such. The app should be small, readable, and require straightforward local setup. The exact interaction for expressing preferences is not confirmed; initial implementation may use sample profiles unless the user chooses otherwise.
+The core recommender uses a prefilled buyer-car positive interaction matrix, item-to-item co-occurrence, and PMI-based ranking. The visitor marks their own preferred cars as input; they do not select a row from the existing matrix. Demo interactions and listings are synthetic and must be labeled as such. The app should be small, readable, and require straightforward local setup.
 
 ## Brand Commitments
 
