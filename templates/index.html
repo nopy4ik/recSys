@@ -16,25 +16,30 @@
     <section class="intro">
       <div class="intro-copy">
         <h1>Подбор автомобиля</h1>
-        <p class="lede">Отметьте машины, которые вам нравятся. Мы сравним ваш выбор с предпочтениями других покупателей.</p>
+        <p class="lede">Укажите бюджет и важные характеристики. Подходящие машины ранжируются по связям в матрице предпочтений покупателей.</p>
       </div>
     </section>
 
     <form class="filters" action="/" method="get">
-      <fieldset class="preferences"><legend>Какие автомобили вам нравятся?</legend><div class="car-options">$car_options</div></fieldset>
       <label class="field budget-field"><span>Бюджет до</span><span class="input-unit"><input name="budget" type="number" min="0" max="20000000" step="100000" value="$budget"><span>₽</span></span></label>
+      <label class="field"><span>Марка</span><select name="brand">$brand_options</select></label>
       <label class="field body-field"><span>Тип кузова</span><select name="body">$body_options</select></label>
+      <label class="field"><span>Год выпуска</span><select name="year">$year_options</select></label>
+      <label class="field"><span>Мощность</span><select name="power">$power_options</select></label>
+      <label class="field"><span>Топливо</span><select name="fuel">$fuel_options</select></label>
+      <label class="field"><span>Коробка передач</span><select name="transmission">$transmission_options</select></label>
+      <label class="field"><span>Привод</span><select name="drive">$drive_options</select></label>
       <button type="submit">Подобрать автомобили <span aria-hidden="true">→</span></button>
     </form>
 
     <section class="recommendations" aria-labelledby="results-title">
-        <div class="section-head results-head"><div><h2 id="results-title">Рекомендуем посмотреть</h2><p>Подборка по похожим предпочтениям</p></div><span class="result-count">$result_count $result_word</span></div>
+        <div class="section-head results-head"><div><h2 id="results-title">Рекомендуем посмотреть</h2><p>Параметры задают подходящие варианты, PMI ранжирует их по матрице предпочтений.</p></div><span class="result-count">$result_count $result_word</span></div>
         <div class="result-list">$results</div>
         <p class="data-note">Цены, характеристики и истории в прототипе синтетические — для учебной демонстрации.</p>
     </section>
 
     <section class="methodology">
-      <div><h2>Как формируется список</h2><p>Для каждой пары автомобилей PMI считается по готовой матрице предпочтений других покупателей. Для вашего выбора оцениваем связь с каждым отмеченным автомобилем и ранжируем кандидатов по среднему значению.</p></div>
+      <div><h2>Как формируется список</h2><p>Ваши параметры отбирают подходящие машины. Затем для каждой пары в готовой матрице предпочтений покупателей рассчитывается PMI, и варианты сортируются по среднему PMI с остальными подходящими машинами.</p></div>
       <code>PMI(x, y) = log₂ (nₓᵧ · N / nₓ · nᵧ)</code>
     </section>
   </main>

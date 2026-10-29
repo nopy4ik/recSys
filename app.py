@@ -27,6 +27,21 @@ CARS = {
     "jolion": {"name": "Haval Jolion", "year": 2022, "body": "Кроссовер", "engine": "1.5 л · робот", "price": 2_650_000},
 }
 
+SPECS = {
+    "rio": {"power": 123, "fuel": "Бензин", "transmission": "Автомат", "drive": "Передний"},
+    "solaris": {"power": 123, "fuel": "Бензин", "transmission": "Автомат", "drive": "Передний"},
+    "polo": {"power": 110, "fuel": "Бензин", "transmission": "Автомат", "drive": "Передний"},
+    "rapid": {"power": 125, "fuel": "Бензин", "transmission": "Автомат", "drive": "Передний"},
+    "corolla": {"power": 122, "fuel": "Бензин", "transmission": "Вариатор", "drive": "Передний"},
+    "camry": {"power": 181, "fuel": "Бензин", "transmission": "Автомат", "drive": "Передний"},
+    "mazda6": {"power": 150, "fuel": "Бензин", "transmission": "Автомат", "drive": "Передний"},
+    "tucson": {"power": 150, "fuel": "Бензин", "transmission": "Автомат", "drive": "Полный"},
+    "sportage": {"power": 150, "fuel": "Бензин", "transmission": "Автомат", "drive": "Полный"},
+    "rav4": {"power": 149, "fuel": "Бензин", "transmission": "Вариатор", "drive": "Полный"},
+    "duster": {"power": 114, "fuel": "Дизель", "transmission": "Механика", "drive": "Полный"},
+    "jolion": {"power": 143, "fuel": "Бензин", "transmission": "Робот", "drive": "Передний"},
+}
+
 # Synthetic positive feedback: each row represents one other buyer's preferences.
 HISTORY_SETS = [
     ("Городской седан", ["rio", "solaris", "polo"]),
@@ -54,6 +69,14 @@ def money(value):
     return f"{value:,}".replace(",", " ") + " ₽"
 
 
+def select_options(options, selected, placeholder, prefix="", labels=None):
+    rows = [f'<option value="">{placeholder}</option>']
+    for value in options:
+        label = labels[value] if labels else value
+        rows.append(f'<option value="{escape(value)}"{" selected" if value == selected else ""}>{prefix}{escape(label)}</option>')
+    return "\n".join(rows)
+
+
 def pmi(left, right, counts, total_users):
     together = sum(1 for history in HISTORIES if left in history["likes"] and right in history["likes"])
     if not together:
@@ -62,25 +85,49 @@ def pmi(left, right, counts, total_users):
     return score, together
 
 
-def recommendations(liked, budget, body):
+def recommendations(budget, body, brand, min_year, power, fuel, transmission, drive):
     counts = Counter(car_id for history in HISTORIES for car_id in history["likes"])
-    ranked = []
+    matching = []
     for car_id, car in CARS.items():
-        if car_id in liked or car["price"] > budget or (body and car["body"] != body):
-            continue
+        specs = SPECS[car_id]
+        matches = (
+            car["price"] <= budget
+            and (not body or car["body"] == body)
+            and (not brand or car["name"].split()[0] == brand)
+            and (not min_year or car["year"] >= min_year)
+            and (not power or power[0] <= specs["power"] <= power[1])
+            and (not fuel or specs["fuel"] == fuel)
+            and (not transmission or specs["transmission"] == transmission)
+            and (not drive or specs["drive"] == drive)
+        )
+        if matches:
+            matching.append(car_id)
+
+    ranked = []
+    for car_id in matching:
         links = []
-        for liked_id in liked:
-            score, together = pmi(car_id, liked_id, counts, len(HISTORIES))
+        for other_id in matching:
+            if other_id == car_id:
+                continue
+            score, together = pmi(car_id, other_id, counts, len(HISTORIES))
             if score is not None:
-                links.append({"source": liked_id, "score": score, "together": together})
+                links.append({"source": other_id, "score": score, "together": together})
         if links:
             links.sort(key=lambda link: link["score"], reverse=True)
-            ranked.append({"id": car_id, "car": car, "score": sum(link["score"] for link in links) / len(links), "links": links})
+            score = sum(link["score"] for link in links) / len(links)
+            score_label = "средний PMI"
+            score_text = f"{score:+.2f}"
+            reason = None
+        else:
+            score = counts[car_id] / len(HISTORIES)
+            score_label = "покупателей"
+            score_text = f"{counts[car_id]} / {len(HISTORIES)}"
+            reason = f"Получил положительные оценки от {counts[car_id]} из {len(HISTORIES)} покупателей"
+        ranked.append({"id": car_id, "car": CARS[car_id], "score": score, "score_label": score_label, "score_text": score_text, "reason": reason, "links": links})
     return sorted(ranked, key=lambda item: item["score"], reverse=True)
 
 
 def render(query):
-    liked = list(dict.fromkeys(car_id for car_id in query.get("car", []) if car_id in CARS))
     body = query.get("body", [""])[0]
     if body not in ("", "Седан", "Лифтбек", "Кроссовер"):
         body = ""
@@ -89,25 +136,47 @@ def render(query):
     except ValueError:
         budget = 3_000_000
     budget = max(0, min(budget, 20_000_000))
+    brand = query.get("brand", [""])[0]
+    brands = sorted({car["name"].split()[0] for car in CARS.values()})
+    if brand not in brands:
+        brand = ""
+    try:
+        min_year = int(query.get("year", [""])[0])
+    except ValueError:
+        min_year = 0
+    if min_year not in (0, 2018, 2019, 2020, 2021, 2022):
+        min_year = 0
+    power_ranges = {"": None, "low": (0, 130), "mid": (131, 160), "high": (161, 500)}
+    power_key = query.get("power", [""])[0]
+    if power_key not in power_ranges:
+        power_key = ""
+    fuel = query.get("fuel", [""])[0]
+    if fuel not in ("", "Бензин", "Дизель"):
+        fuel = ""
+    transmission = query.get("transmission", [""])[0]
+    if transmission not in ("", "Автомат", "Вариатор", "Механика", "Робот"):
+        transmission = ""
+    drive = query.get("drive", [""])[0]
+    if drive not in ("", "Передний", "Полный"):
+        drive = ""
 
-    car_options = "\n".join(
-        f'<label class="car-option"><input type="checkbox" name="car" value="{car_id}"{" checked" if car_id in liked else ""}><span>{escape(car["name"])}</span><small>{car["year"]} · {escape(car["body"])}</small></label>'
-        for car_id, car in CARS.items()
-    )
-    recs = recommendations(liked, budget, body)
+    recs = recommendations(budget, body, brand, min_year, power_ranges[power_key], fuel, transmission, drive)
     if recs:
         result_markup = "\n".join(recommendation_row(item, rank) for rank, item in enumerate(recs, start=1))
-    elif not liked:
-        result_markup = '<div class="empty"><strong>Отметьте автомобили, которые вам нравятся</strong><p>Мы сравним ваш выбор с готовой матрицей предпочтений покупателей.</p></div>'
     else:
-        result_markup = '<div class="empty"><strong>Подходящих рекомендаций нет</strong><p>Увеличьте бюджет или выберите другой тип кузова.</p></div>'
+        result_markup = '<div class="empty"><strong>Подходящих автомобилей не найдено</strong><p>Измените параметры поиска и попробуйте ещё раз.</p></div>'
     return TEMPLATE.substitute(
-        car_options=car_options,
         budget=budget,
+        brand_options=select_options(brands, brand, "Любая марка"),
         body_options="\n".join(
             f'<option value="{value}"{" selected" if value == body else ""}>{label}</option>'
             for value, label in (("", "Любой кузов"), ("Седан", "Седан"), ("Лифтбек", "Лифтбек"), ("Кроссовер", "Кроссовер"))
         ),
+        year_options=select_options(["2018", "2019", "2020", "2021", "2022"], str(min_year) if min_year else "", "Любой год", "От "),
+        power_options=select_options(["low", "mid", "high"], power_key, "Любая мощность", labels={"low": "До 130 л.с.", "mid": "131–160 л.с.", "high": "Более 160 л.с."}),
+        fuel_options=select_options(["Бензин", "Дизель"], fuel, "Любое топливо"),
+        transmission_options=select_options(["Автомат", "Вариатор", "Механика", "Робот"], transmission, "Любая коробка"),
+        drive_options=select_options(["Передний", "Полный"], drive, "Любой привод"),
         results=result_markup,
         result_count=len(recs),
         result_word="автомобилей" if len(recs) in (0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14) else ("автомобиль" if len(recs) % 10 == 1 else "автомобиля"),
@@ -116,14 +185,17 @@ def render(query):
 
 def recommendation_row(item, rank):
     car = item["car"]
-    top_link = item["links"][0]
-    source = CARS[top_link["source"]]["name"]
-    score = f"{item['score']:+.2f}"
+    if item["links"]:
+        top_link = item["links"][0]
+        source = CARS[top_link["source"]]["name"]
+        reason = f'Похож на {escape(source)} · {top_link["together"]} общих покупателей · PMI {top_link["score"]:+.2f}'
+    else:
+        reason = item["reason"]
     return f'''<article class="result-row">
       <span class="rank">{rank:02}</span>
       <div class="car-main"><h3>{escape(car["name"])}</h3><p>{car["year"]} · {escape(car["body"])} · {escape(car["engine"])}</p>
-        <p class="reason">Похож на {escape(source)} <span>· {top_link["together"]} общих покупателей · PMI {top_link["score"]:+.2f}</span></p></div>
-      <div class="car-score"><strong>{score}</strong><span>средний PMI</span></div>
+        <p class="reason">{reason}</p></div>
+      <div class="car-score"><strong>{item["score_text"]}</strong><span>{item["score_label"]}</span></div>
       <div class="price">{money(car["price"])}</div>
     </article>'''
 
