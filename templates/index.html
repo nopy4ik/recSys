@@ -33,14 +33,8 @@
     </form>
 
     <section class="recommendations" aria-labelledby="results-title">
-        <div class="section-head results-head"><div><h2 id="results-title">Рекомендуем посмотреть</h2><p>Параметры задают подходящие варианты, PMI ранжирует их по матрице предпочтений.</p></div><span class="result-count">$result_count $result_word</span></div>
+        <div class="section-head results-head"><h2 id="results-title">Рекомендуем посмотреть</h2><span class="result-count">$result_count $result_word</span></div>
         <div class="result-list">$results</div>
-        <p class="data-note">Цены, характеристики и истории в прототипе синтетические — для учебной демонстрации.</p>
-    </section>
-
-    <section class="methodology">
-      <div><h2>Как формируется список</h2><p>Ваши параметры отбирают подходящие машины. Затем для каждой пары в готовой матрице предпочтений покупателей рассчитывается PMI, и варианты сортируются по среднему PMI с остальными подходящими машинами.</p></div>
-      <code>PMI(x, y) = log₂ (nₓᵧ · N / nₓ · nᵧ)</code>
     </section>
   </main>
 
